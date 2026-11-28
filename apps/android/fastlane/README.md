@@ -12,4 +12,18 @@ Limits: title 30 characters, short description 80, full description 4000.
 - **Ads:** none.
 - **App access:** some features need a paired machine; give the demo machine's address and code, as in `apps/ios/fastlane/metadata/review_information/notes.txt`.
 - **Privacy policy:** https://www.wainhq.com/docs/reference/privacy
-- **Graphics:** 512 × 512 icon, 1024 × 500 feature graphic, phone screenshots at 1080 × 1920 or larger.
+- **Graphics:** `images/icon.png` (512 × 512, written by `brand/build.py --install`), `images/featureGraphic.png` (1024 × 500), and five phone screenshots in `images/phoneScreenshots/` (1440 × 2560).
+
+## Retaking the screenshots
+
+The phone shots are real captures from a Pixel 7-sized emulator (1080 × 2400), framed on Paper's Store page next to the iPhone ones. Use the scratch server the iPhone retake seeds (`apps/ios/fastlane/README.md`), which the emulator reaches at `ws://10.0.2.2:<port>`. Before capturing, turn on dark mode and the demo status bar:
+
+```bash
+adb shell cmd uimode night yes
+adb shell settings put global sysui_demo_allowed 1
+adb shell am broadcast -a com.android.systemui.demo -e command clock -e hhmm 0941
+adb shell am broadcast -a com.android.systemui.demo -e command network -e mobile hide
+adb shell am broadcast -a com.android.systemui.demo -e command network -e wifi show -e level 4 -e fully true
+```
+
+Pair through Enter an address, open each screen, and save it with `adb exec-out screencap -p > shot.png`. The frames are 9:16 because Play refuses a screenshot more than twice as tall as it is wide, which a raw 1080 × 2400 capture is.

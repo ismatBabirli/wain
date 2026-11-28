@@ -13,4 +13,13 @@ Limits: name and subtitle 30 characters, promotional text 170, keywords 100, des
 - **Category:** Developer Tools (`metadata/primary_category.txt`).
 - **Price:** free, every country.
 - **Export compliance:** HTTPS and standard crypto only, already declared by `ITSAppUsesNonExemptEncryption = NO`.
-- **Screenshots:** 6.9" iPhone (1320 × 2868) and 13" iPad (2064 × 2752), since the app runs on iPad.
+- **Screenshots:** `screenshots/en-US/`, five on a 6.9" iPhone (1320 × 2868) and four on a 13" iPad (2064 × 2752), since the app runs on iPad.
+
+## Retaking the screenshots
+
+Each shot is a real capture framed on Paper's Store page ("Wain — Design System"), so a change to a screen shown means a retake:
+
+1. Seed and start a scratch server: `python3 apps/ios/scripts/store_seed.py /private/tmp/wain-store`, then the two commands its docstring gives.
+2. On an iPhone 17 Pro Max and a 13-inch iPad simulator, set the region to US English (so the clock reads 9:41) and override the status bar: `xcrun simctl status_bar <udid> override --time 9:41 --batteryState discharging --batteryLevel 100 --wifiBars 3 --cellularBars 4`, and dark mode with `xcrun simctl ui <udid> appearance dark`.
+3. Run `StoreShotsTests` on each, with `TEST_RUNNER_WAIN_URL=ws://127.0.0.1:<port>` and `TEST_RUNNER_WAIN_TOKEN` from the seed. Build signed as usual: without signing the app has no Keychain, and the server refuses its empty token.
+4. Export the attachments (`xcrun xcresulttool export attachments`), drop each into its Paper frame, and export the frames at 1x.
