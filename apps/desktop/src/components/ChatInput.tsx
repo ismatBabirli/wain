@@ -32,6 +32,7 @@ import {
 import { useDraft } from "@/hooks/useDraft";
 import { useFileSearch } from "@/hooks/useFileSearch";
 import { useHotkey } from "@/hooks/useHotkey";
+import { chordFor } from "@/hooks/useShortcuts";
 import { useBotMentionRepo } from "@/hooks/useBotMentionRepo";
 import { useGithubRepo, useIssueSearch } from "@/hooks/useIssueSearch";
 import { usePrMentions } from "@/hooks/usePrMarks";
@@ -41,6 +42,7 @@ import { applyIssue, cutRange, insertIssue, issueSpan, rememberIssueTitle } from
 import { slugKey } from "@/lib/pr";
 import { filterPrs, prEmptyNote, prIdentifier } from "@/lib/prMention";
 import { placeSegments } from "@/lib/richText";
+import { chordFromKey, sameChord } from "@/lib/shortcuts";
 import { LOCAL, serverOfPath } from "@/lib/transport";
 import { forget, keepUploading, MAX_UPLOAD_BYTES } from "@/lib/uploads";
 import {
@@ -1153,10 +1155,13 @@ export default function ChatInput({
                     // `% rowCount` is a division by zero and Enter would be
                     // swallowed by a pick that can only land on nothing.
                     //
-                    // ⇧Tab flips the `#` menu between issues and pull requests,
-                    // with or without rows: an empty list is where it is wanted.
-                    // Stopped, since ⇧Tab is also `model.next` on the document.
-                    if (menuOpen && issue && e.key === "Tab" && e.shiftKey) {
+                    // `mention.kind` (⇧Tab) flips the `#` menu between issues and
+                    // pull requests, with or without rows: an empty list is where
+                    // it is wanted. Stopped, since ⇧Tab is also `model.next` on
+                    // the document.
+                    const flip = menuOpen && issue ? chordFor("mention.kind") : null;
+                    const pressed = flip && chordFromKey(e);
+                    if (flip && pressed && sameChord(flip, pressed)) {
                       e.preventDefault();
                       e.stopPropagation();
                       setMentionKind(listingPrs ? "issues" : "prs");
