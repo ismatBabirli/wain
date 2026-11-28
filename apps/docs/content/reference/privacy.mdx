@@ -1,18 +1,18 @@
 ---
 title: Privacy
-description: Wain's privacy policy. What the desktop app, Wain accounts and wainhq.com collect, where it is kept, what is never sent, and how to delete your account.
+description: Wain's privacy policy. What the desktop and phone apps, Wain accounts and wainhq.com collect, where it is kept, what is never sent, and how to delete your account.
 sidebar:
   order: 4
 ---
 
-This is Wain's privacy policy. It covers the Wain desktop app, the `wain` command line and server, Wain accounts, and wainhq.com with these docs. Wain is run by Ismat Babirli; "we" and "us" here mean him. Write to [support@wainhq.com](mailto:support@wainhq.com) about anything on this page.
+This is Wain's privacy policy. It covers the Wain desktop app, the iPhone and Android apps, the `wain` command line and server, Wain accounts, and wainhq.com with these docs. Wain is run by Ismat Babirli; "we" and "us" here mean him. Write to [support@wainhq.com](mailto:support@wainhq.com) about anything on this page.
 
 Last updated: 28 November 2026.
 
 In short:
 
 - Your prompts, code, transcripts and files stay on your own machines.
-- The desktop app sends anonymous usage counts and crash reports, on by default. Turn either off in **Settings → Privacy**.
+- The desktop, iPhone and Android apps send anonymous usage counts and crash reports, on by default. Turn either off in **Settings → Privacy**.
 - A [Wain account](#your-wain-account) holds your name, email address and the machines you sign in on.
 - We sell nothing, show no ads and do not track you across other apps or sites.
 
@@ -41,7 +41,16 @@ While usage data is on, Wain may now and then show a short survey in the app. Yo
 
 To turn everything off for one run, whatever the switches say, start Wain with `WAIN_NO_ANALYTICS` or `DO_NOT_TRACK=1` set. See [Data on disk](/reference/data#environment-variables).
 
-The `wain` command, the standalone server (`wain-serve`) and the iPhone and Android apps send none of this.
+### On iPhone and Android
+
+The iPhone and Android apps send less, to the same place, with the same two switches in their own **Settings → Privacy**:
+
+- **Usage data:** that the app opened, the days you use it, the app's version and build, and your phone's operating system and its version.
+- **Crash reports:** the kind of crash and where in Wain's own code it happened, never the error's message. On iPhone, Wain reads the crash report iOS itself keeps; on Android, Wain notes the crash as it happens. Either way it is sent the next time you open the app.
+
+Each phone has its own random id, separate from your desktop's, and not tied to your Wain account, name, email or phone number. Turning both switches off deletes it.
+
+The `wain` command and the standalone server (`wain-serve`) send none of this.
 
 The full details of an error stay on your machine, in `~/.wain`. An agent line Wain could not read, for one, is kept in `~/.wain/parse_failures.jsonl`.
 

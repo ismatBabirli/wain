@@ -20,6 +20,8 @@
 		<key>UIImageName</key>
 		<string>LaunchMark</string>
 	</dict>
+	<key>PostHogKey</key>
+	<string>$(POSTHOG_KEY)</string>
 	<key>NSUserActivityTypes</key>
 	<array>
 		<string>INSendMessageIntent</string>

@@ -4,3 +4,8 @@
     *** Companion;
     kotlinx.serialization.KSerializer serializer(...);
 }
+
+# Crash reports (store/Analytics.kt) name the exception and our own frames, read with no mapping file.
+-keepattributes SourceFile,LineNumberTable
+-keepnames class com.wainhq.wain.** { *; }
+-keepnames class * extends java.lang.Throwable

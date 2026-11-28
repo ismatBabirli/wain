@@ -9,6 +9,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import com.wainhq.wain.store.Analytics
 import com.wainhq.wain.store.OpenIntoBot
 import com.wainhq.wain.store.allBots
 import androidx.compose.foundation.layout.Arrangement
@@ -46,6 +47,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.Mic
+import androidx.compose.material.icons.outlined.PrivacyTip
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
@@ -84,6 +86,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.wainhq.wain.BuildConfig
@@ -112,6 +115,7 @@ private sealed interface Page {
     data object Root : Page
     data object Servers : Page
     data class Server(val id: String) : Page
+    data object Privacy : Page
     data object Licences : Page
     data class Licence(val component: com.wainhq.wain.model.Licences.Component) : Page
 }
@@ -133,6 +137,7 @@ fun SettingsScreen(focus: String?, back: () -> Unit, dictation: () -> Unit = {},
                 SettingsRow("Dictation", icon = { Icon(Icons.Outlined.Mic, null, Modifier.size(20.dp), tint = Wain.secondary) }, onClick = dictation)
                 SettingsRow("Notifications", icon = { Icon(Icons.Outlined.Notifications, null, Modifier.size(20.dp), tint = Wain.secondary) },
                     value = if (com.wainhq.wain.push.Push.enabled && com.wainhq.wain.push.Push.available) "On" else "Off", onClick = notifications)
+                SettingsRow("Privacy", icon = { Icon(Icons.Outlined.PrivacyTip, null, Modifier.size(20.dp), tint = Wain.secondary) }) { pages.add(Page.Privacy) }
                 OpenBotRow()
             }
             About { pages.add(Page.Licences) }
@@ -141,6 +146,7 @@ fun SettingsScreen(focus: String?, back: () -> Unit, dictation: () -> Unit = {},
             ServerCards(null, open = { pages.add(Page.Server(it)) }, all = {}, add = add)
         }
         is Page.Server -> ServerDetail(page.id, ::pop)
+        Page.Privacy -> SettingsPage("Privacy", ::pop) { Privacy() }
         Page.Licences -> SettingsPage("Open source licences", ::pop) { LicenceList { pages.add(Page.Licence(it)) } }
         is Page.Licence -> SettingsPage(page.component.name, ::pop) { LicenceText(page.component) }
     }
@@ -217,6 +223,36 @@ private fun About(licences: () -> Unit) {
         RowDivider()
         SettingsRow("Open source licences", onClick = licences)
     }
+}
+
+/** Usage counts and crash reports, a switch each, both on by default; [Analytics] reads them per event. */
+@Composable
+private fun Privacy() {
+    val context = LocalContext.current
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        RowGroup {
+            SwitchRow("", Analytics.usage, content = { SwitchLabel("Share usage data", "Which version you run and the days you open it, under a random id.") }) { Analytics.turnUsage(it) }
+            RowDivider()
+            SwitchRow("", Analytics.crashes, content = { SwitchLabel("Send crash reports", "Where Wain broke in its own code. Never the error's text.") }) { Analytics.turnCrashes(it) }
+        }
+        Text(
+            buildAnnotatedString {
+                append("The ")
+                withStyle(SpanStyle(color = Wain.text, textDecoration = TextDecoration.Underline)) { append("privacy policy") }
+                append(" lists every field Wain sends, and what it never sends.")
+            },
+            Modifier.padding(horizontal = 4.dp).clickable {
+                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://wainhq.com/docs/reference/privacy")))
+            },
+            style = Wain.Font.footnote.copy(color = Wain.tertiary),
+        )
+    }
+}
+
+@Composable
+private fun SwitchLabel(label: String, detail: String) = Column(Modifier.padding(vertical = 12.dp).padding(end = 12.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+    Text(label, style = Wain.Font.body)
+    Text(detail, style = Wain.Font.footnote.copy(color = Wain.tertiary))
 }
 
 /** A row per component the app ships, its licence beside it. */

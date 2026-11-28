@@ -364,6 +364,12 @@ struct ConnectState: View {
                             .font(Theme.Font.footnote).foregroundStyle(Theme.tertiary).multilineTextAlignment(.center)
                             .fixedSize(horizontal: false, vertical: true)
                             .padding(.top, Theme.Space.s)
+                        // Told before much use, since both switches start on.
+                        (Text("Wain sends anonymous usage counts and crash reports, never your code or prompts. Turn them off in ")
+                            + Text("Settings\u{a0}→\u{a0}Privacy").foregroundStyle(Theme.secondary) + Text("."))
+                            .font(Theme.Font.footnote).foregroundStyle(Theme.tertiary).multilineTextAlignment(.center)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .padding(.top, Theme.Space.l)
                     }
                     .padding(.top, Theme.Space.xs)
                 }

@@ -18,6 +18,7 @@ struct WainApp: App {
         launch = LaunchBot.bot(store).flatMap { store.botChat($0.server, $0.bot).last }
         // Before launch ends, so a tapped or answered alert that launched the app reaches it.
         Push.shared.start(store)
+        Analytics.start()
     }
     @Environment(\.scenePhase) private var phase
 
@@ -40,7 +41,10 @@ struct WainApp: App {
                 }
         }
         .onChange(of: phase) { _, now in
-            if now == .active { store.resume() }
+            if now == .active {
+                store.resume()
+                Analytics.activeDay()
+            }
         }
     }
 }
