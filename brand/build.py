@@ -252,6 +252,10 @@ def main():
     if "--install" in sys.argv:
         install(out, lw, lh, body, mark.w * 96 / mark.h, mark.path(96 / mark.h))
         install_phones(mark)
+        # Google Play's listing icon: a full square, which Play rounds itself.
+        play = ROOT / "apps/android/fastlane/metadata/android/en-US/images"
+        play.mkdir(parents=True, exist_ok=True)
+        tile_icon(mark, 512, TILE_DARK, WHITE, rounded=False).convert("RGB").save(play / "icon.png")
         # Upstream's red profile picture, kept under its name with Wain's mark on it.
         tile_icon(mark, 800, (255, 0, 0), WHITE, rounded=False).save(ROOT / "apps/desktop/public/assets/wain-profile-red-fill.png")
 
