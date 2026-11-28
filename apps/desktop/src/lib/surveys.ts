@@ -20,7 +20,11 @@ import { invoke } from "@/lib/transport";
 import type { SurveyIdentity } from "@/types/events";
 
 /// The SDK once started, so the usage switch can stop it mid-run.
-let started: { set_config(c: { disable_surveys: boolean }): void; opt_out_capturing(): void } | null = null;
+let started: {
+  set_config(c: { disable_surveys: boolean }): void;
+  opt_out_capturing(): void;
+  opt_in_capturing(o: { captureEventName: false }): void;
+} | null = null;
 
 /// Starts PostHog, or does nothing where Rust refuses. Called at startup, and
 /// again when the usage switch comes back on in a run that never started it.
@@ -51,7 +55,12 @@ export async function startSurveys(): Promise<void> {
       capture_pageview: false,
       capture_pageleave: false,
       disable_session_recording: true,
-      loaded: (ph) => ph.setPersonProperties(identity.personProperties),
+      loaded: (ph) => {
+        // Rust has said yes, so an opt-out the SDK saved in an earlier run, when
+        // the switch was off, is stale. Without this it drops every capture.
+        if (ph.has_opted_out_capturing()) ph.opt_in_capturing({ captureEventName: false });
+        ph.setPersonProperties(identity.personProperties);
+      },
     });
     started = posthog;
   } catch (e) {
@@ -63,11 +72,13 @@ export async function startSurveys(): Promise<void> {
 
 /// Follows Settings → Privacy's usage switch. Off stops surveys and anything
 /// the SDK would send; on again starts it in a run that never had it, and
-/// otherwise waits for the next launch, since re-initialising a live SDK is
-/// not supported.
+/// otherwise opts the SDK back in, with surveys back from the next launch,
+/// since re-initialising a live SDK is not supported.
 export async function setSurveysAllowed(on: boolean): Promise<void> {
   if (on) {
-    if (!started) await startSurveys();
+    if (!started) return startSurveys();
+    // The SDK saves the opt-out below, so it must be undone here.
+    started.opt_in_capturing({ captureEventName: false });
     return;
   }
   started?.set_config({ disable_surveys: true });
