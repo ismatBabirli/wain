@@ -975,9 +975,12 @@ fn service_start() -> Result<String, String> {
     // Agents run in the server's cgroup, being its children, so under the
     // default `OOMPolicy=stop` the kernel killing one agent's compiler stopped
     // the server and every session (#708). `continue` costs that one process.
+    // Uncapped, agents filled a swapless box until sshd and tailscaled starved
+    // and only a hard reset brought it back (#70); `MemoryMax` keeps the kill
+    // inside this cgroup.
     let unit = format!(
         "[Unit]\nDescription=Wain server\n\n[Service]\nExecStart=\"{}\"\nEnvironment=\"PATH={}\"\n\
-         Restart=on-failure\nRestartSec=2\nOOMPolicy=continue\n\n[Install]\nWantedBy=default.target\n",
+         Restart=on-failure\nRestartSec=2\nOOMPolicy=continue\nMemoryMax=80%\n\n[Install]\nWantedBy=default.target\n",
         unit_escape(&serve.display().to_string()),
         unit_escape(&unit_env_path(&serve)?),
     );
