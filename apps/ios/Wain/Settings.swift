@@ -3,12 +3,13 @@ import SwiftUI
 import UIKit
 import UserNotifications
 
-/// Where Settings can go: a server's page, every server, Dictation, Notifications, the licences.
+/// Where Settings can go: a server's page, every server, Dictation, Notifications, Privacy, the licences.
 enum SettingsPage: Hashable {
     case server(UUID)
     case servers
     case dictation
     case notifications
+    case privacy
     case licences
     case licence(Licences.Component)
 }
@@ -40,6 +41,8 @@ struct SettingsView: View {
                         NavigationLink(value: SettingsPage.notifications) {
                             SettingsRow("Notifications", icon: "bell", value: notify ? "On" : "Off")
                         }
+                        RowDivider(inset: 48)
+                        NavigationLink(value: SettingsPage.privacy) { SettingsRow("Privacy", icon: "hand.raised") }
                         if !store.allBots.isEmpty || !launchBot.isEmpty {
                             RowDivider(inset: 48)
                             launchBotRow
@@ -81,6 +84,7 @@ struct SettingsView: View {
                         .navigationBarTitleDisplayMode(.inline)
                 case .dictation: DictationSettings()
                 case .notifications: NotificationSettings()
+                case .privacy: PrivacySettings()
                 case .licences: LicencesView()
                 case .licence(let c): LicenceView(component: c)
                 }
@@ -927,6 +931,41 @@ private struct KindSwitch: View {
     }
 }
 
+// MARK: Privacy
+
+/// Usage counts and crash reports, a switch each, both on by default; `Analytics` reads them per event.
+struct PrivacySettings: View {
+    @AppStorage(Analytics.usageKey) private var usage = true
+    @AppStorage(Analytics.crashKey) private var crashes = true
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: Theme.Space.s) {
+                RowGroup {
+                    switchRow("Share usage data", detail: "Which version you run and the days you open it, under a random id.", $usage)
+                    RowDivider()
+                    switchRow("Send crash reports", detail: "Where Wain broke in its own code. Never the error's text.", $crashes)
+                }
+                Link(destination: URL(string: "https://wainhq.com/docs/reference/privacy")!) {
+                    (Text("The ") + Text("privacy policy").foregroundStyle(Theme.text).underline()
+                        + Text(" lists every field Wain sends, and what it never sends."))
+                        .multilineTextAlignment(.leading)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .font(Theme.Font.footnote).foregroundStyle(Theme.tertiary)
+                .padding(.horizontal, Theme.Space.m)
+            }
+            .padding(.horizontal, Theme.Space.l)
+            .padding(.top, Theme.Space.m)
+        }
+        .background(Theme.card.ignoresSafeArea())
+        .foregroundStyle(Theme.text)
+        .navigationTitle("Privacy")
+        .navigationBarTitleDisplayMode(.inline)
+        .onChange(of: usage || crashes) { _, any in if !any { Analytics.forget() } }
+    }
+}
+
 /// Settings' Open bot at launch: the bot whose chat a launch opens, empty for off.
 enum LaunchBot {
     static let key = "launch.bot"
@@ -946,4 +985,17 @@ private func switchRow(_ label: String, _ on: Binding<Bool>) -> some View {
         .font(Theme.Font.body)
         .padding(.leading, Theme.Space.l).padding(.trailing, 14)
         .frame(minHeight: 52)
+}
+
+/// A switch with a line under its label saying what it does.
+private func switchRow(_ label: String, detail: String, _ on: Binding<Bool>) -> some View {
+    Toggle(isOn: on) {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(label)
+            Text(detail).font(Theme.Font.footnote).foregroundStyle(Theme.tertiary).fixedSize(horizontal: false, vertical: true)
+        }
+    }
+    .toggleStyle(SwitchStyle())
+    .font(Theme.Font.body)
+    .padding(.leading, Theme.Space.l).padding(.trailing, 14).padding(.vertical, Theme.Space.m)
 }

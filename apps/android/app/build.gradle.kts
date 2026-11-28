@@ -38,6 +38,8 @@ android {
         versionName = "0.1.0"
         // The push relay. A debug build can be pointed at a local one with the `pushRelay` intent extra.
         buildConfigField("String", "PUSH_RELAY", "\"https://wainhq.com\"")
+        // PostHog's project key, from release-android.yml's secret. Empty everywhere else, which sends nothing.
+        buildConfigField("String", "POSTHOG_KEY", "\"${System.getenv("POSTHOG_KEY").orEmpty()}\"")
     }
 
     signingConfigs {

@@ -57,6 +57,8 @@ jobs:
           WAIN_ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_UPLOAD_PASSWORD }}
           WAIN_ANDROID_KEY_ALIAS: upload
           WAIN_ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_UPLOAD_PASSWORD }}
+          # Into BuildConfig; without the secret the app sends nothing.
+          POSTHOG_KEY: ${{ secrets.POSTHOG_KEY }}
         run: ./gradlew --no-daemon :app:bundleRelease
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

@@ -5,6 +5,7 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
 import com.wainhq.wain.push.Push
+import com.wainhq.wain.store.Analytics
 import com.wainhq.wain.store.OpenIntoBot
 import com.wainhq.wain.store.Store
 import com.wainhq.wain.voice.Dictations
@@ -22,12 +23,14 @@ class WainApplication : Application() {
         Push.start(this, store)
         Dictations.start(this)
         OpenIntoBot.start(this)
+        Analytics.start(this)
         ProcessLifecycleOwner.get().lifecycle.addObserver(object : DefaultLifecycleObserver {
             private var poll: Job? = null
 
             // Coming back to the front reconnects whatever dropped, and PR marks poll only while on screen.
             override fun onStart(owner: LifecycleOwner) {
                 store.resume()
+                Analytics.activeDay()
                 poll = store.scope.launch {
                     while (true) {
                         store.pollMarks()

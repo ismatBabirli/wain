@@ -25,6 +25,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -96,6 +99,16 @@ private fun FirstRun(nav: TabNav) {
         CapsuleButton("Enter an address") { nav.addServer(false) }
         Text("On your Mac: Settings › Servers › Pair a phone. On a server, run wain server pair.",
             Modifier.padding(top = 12.dp), style = Wain.Font.footnote.copy(color = Wain.tertiary), textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+        // Told before much use, since both switches start on.
+        Text(
+            buildAnnotatedString {
+                append("Wain sends anonymous usage counts and crash reports, never your code or prompts. Turn them off in ")
+                withStyle(SpanStyle(color = Wain.secondary)) { append("Settings › Privacy") }
+                append(".")
+            },
+            Modifier.padding(top = 12.dp),
+            style = Wain.Font.footnote.copy(color = Wain.tertiary), textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+        )
     }
 }
 

@@ -98,11 +98,22 @@ jobs:
           YML
           xcodegen generate --spec ci.yml
 
+      # POSTHOG_KEY reaches Info.plist as a build setting; without the secret the app sends nothing.
       - name: Archive
         working-directory: apps/ios
+        env:
+          POSTHOG_KEY: ${{ secrets.POSTHOG_KEY }}
         run: |
           xcodebuild -quiet -project Wain.xcodeproj -scheme Wain -configuration Release \
-            -destination generic/platform=iOS -archivePath "$RUNNER_TEMP/Wain.xcarchive" archive
+            -destination generic/platform=iOS -archivePath "$RUNNER_TEMP/Wain.xcarchive" \
+            POSTHOG_KEY="$POSTHOG_KEY" archive
+
+      # Crash reports name frames by offset into the binary; this build's dSYM reads them (atos).
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: wain-ios-dsyms-${{ github.run_number }}
+          path: ${{ runner.temp }}/Wain.xcarchive/dSYMs
+          retention-days: 90
 
       - name: Upload to TestFlight
         run: |
